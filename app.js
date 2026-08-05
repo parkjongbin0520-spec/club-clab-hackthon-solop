@@ -1,8 +1,11 @@
 const STORAGE_KEY = "activities";
+const TODO_STORAGE_KEY = "todos";
 let editingId = null;
 let dialogRating = 0;
 let selectMode = false;
 let selectedIds = new Set();
+let todoSelectMode = false;
+let selectedTodoIds = new Set();
 
 // 활동 고유 id를 생성한다
 function generateId() {
@@ -465,6 +468,173 @@ function handleDialogBackdropClick(event) {
   }
 }
 
+// "기록"/"할일" 탭을 전환한다
+function switchTab(tabName) {
+  document.querySelectorAll(".tab-view").forEach((view) => {
+    view.classList.toggle("active", view.id === `${tabName}-view`);
+  });
+  document.querySelectorAll(".tab-button").forEach((button) => {
+    button.classList.toggle("active", button.dataset.tab === tabName);
+  });
+}
+
+// 저장된 할 일을 최신순으로 정렬해서 불러온다
+function loadTodos() {
+  const raw = localStorage.getItem(TODO_STORAGE_KEY);
+  const todos = raw ? JSON.parse(raw) : [];
+  return todos.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+// 할 일 1건의 완료 여부를 저장한다
+function toggleTodoDone(id, done) {
+  const todos = loadTodos();
+  const target = todos.find((todo) => todo.id === id);
+  if (!target) {
+    return;
+  }
+  target.done = done;
+  localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todos));
+}
+
+// 할 일 1건을 체크박스형 항목 요소로 만든다
+function createTodoItem(todo) {
+  const row = document.createElement("div");
+  row.className = "todo-item";
+  row.dataset.id = todo.id;
+  if (todo.done) {
+    row.classList.add("done");
+  }
+  if (todoSelectMode && selectedTodoIds.has(todo.id)) {
+    row.classList.add("selected");
+  }
+
+  const label = document.createElement("label");
+  label.className = "todo-checkbox-label";
+
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.className = "todo-checkbox";
+  checkbox.dataset.id = todo.id;
+  checkbox.checked = todoSelectMode ? selectedTodoIds.has(todo.id) : todo.done;
+  label.appendChild(checkbox);
+
+  const textEl = document.createElement("span");
+  textEl.className = "todo-text";
+  textEl.textContent = todo.text;
+  label.appendChild(textEl);
+
+  row.appendChild(label);
+  return row;
+}
+
+// 할 일 목록 영역을 다시 그린다
+function renderTodoList() {
+  const listEl = document.getElementById("todo-list");
+  listEl.innerHTML = "";
+
+  const todos = loadTodos();
+  if (todos.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-message";
+    empty.textContent = "아직 등록된 할 일이 없어요. '+ 새 할일 기록' 버튼을 눌러보세요.";
+    listEl.appendChild(empty);
+    return;
+  }
+
+  todos.forEach((todo) => {
+    listEl.appendChild(createTodoItem(todo));
+  });
+}
+
+// 할 일 체크박스 클릭을 처리한다 (평소엔 완료 토글, 선택 모드에선 선택 토글)
+function handleTodoListChange(event) {
+  if (!event.target.classList.contains("todo-checkbox")) {
+    return;
+  }
+  const id = event.target.dataset.id;
+
+  if (todoSelectMode) {
+    if (event.target.checked) {
+      selectedTodoIds.add(id);
+    } else {
+      selectedTodoIds.delete(id);
+    }
+    event.target.closest(".todo-item").classList.toggle("selected", event.target.checked);
+    updateTodoSelectButtonLabel();
+    return;
+  }
+
+  toggleTodoDone(id, event.target.checked);
+  renderTodoList();
+}
+
+// 할 일 선택 삭제 버튼의 문구와 강조 상태를 갱신한다
+function updateTodoSelectButtonLabel() {
+  const button = document.getElementById("toggle-todo-select-button");
+  button.classList.toggle("active", todoSelectMode);
+  if (!todoSelectMode) {
+    button.textContent = "삭제";
+    return;
+  }
+  button.textContent = selectedTodoIds.size > 0 ? `선택 삭제 (${selectedTodoIds.size})` : "선택 취소";
+}
+
+// 할 일 삭제 선택 모드를 켜고 끄거나, 선택된 항목을 한꺼번에 삭제한다
+function toggleTodoSelectMode() {
+  if (!todoSelectMode) {
+    todoSelectMode = true;
+    selectedTodoIds.clear();
+    updateTodoSelectButtonLabel();
+    renderTodoList();
+    return;
+  }
+
+  if (selectedTodoIds.size === 0) {
+    todoSelectMode = false;
+    updateTodoSelectButtonLabel();
+    renderTodoList();
+    return;
+  }
+
+  if (confirm(`선택한 ${selectedTodoIds.size}개 할 일을 삭제할까요?`)) {
+    const remaining = loadTodos().filter((todo) => !selectedTodoIds.has(todo.id));
+    localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(remaining));
+    todoSelectMode = false;
+    selectedTodoIds.clear();
+    updateTodoSelectButtonLabel();
+    renderTodoList();
+  }
+}
+
+// 새 할 일을 기록하기 위해 모달을 연다
+function openTodoCreateDialog() {
+  document.getElementById("todo-form").reset();
+  document.getElementById("todo-text-error").textContent = "";
+  document.getElementById("todo-dialog").showModal();
+}
+
+// 할 일 등록 폼 제출을 처리한다
+function handleTodoSubmit(event) {
+  event.preventDefault();
+  const form = event.target;
+  const text = form.text.value.trim();
+  const errorEl = document.getElementById("todo-text-error");
+
+  if (!text) {
+    errorEl.textContent = "할 일 내용을 입력해야 등록할 수 있어요.";
+    form.text.focus();
+    return;
+  }
+  errorEl.textContent = "";
+
+  const todos = loadTodos();
+  todos.push({ id: generateId(), text, done: false, createdAt: new Date().toISOString() });
+  localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todos));
+
+  document.getElementById("todo-dialog").close();
+  renderTodoList();
+}
+
 const activityDialog = document.getElementById("activity-dialog");
 activityDialog.addEventListener("close", resetDialogState);
 activityDialog.addEventListener("click", handleDialogBackdropClick);
@@ -487,4 +657,24 @@ document.getElementById("dialog-stars").addEventListener("click", (event) => {
   dialogRating = Number(event.target.dataset.value);
   updateDialogStars();
 });
+
+const todoDialog = document.getElementById("todo-dialog");
+todoDialog.addEventListener("close", () => {
+  document.getElementById("todo-form").reset();
+});
+todoDialog.addEventListener("click", handleDialogBackdropClick);
+
+document.getElementById("todo-form").addEventListener("submit", handleTodoSubmit);
+document.getElementById("todo-list").addEventListener("change", handleTodoListChange);
+document.getElementById("open-todo-create-button").addEventListener("click", openTodoCreateDialog);
+document.getElementById("cancel-todo-dialog-button").addEventListener("click", () => {
+  todoDialog.close();
+});
+document.getElementById("toggle-todo-select-button").addEventListener("click", toggleTodoSelectMode);
+
+document.querySelectorAll(".tab-button").forEach((button) => {
+  button.addEventListener("click", () => switchTab(button.dataset.tab));
+});
+
 renderList();
+renderTodoList();

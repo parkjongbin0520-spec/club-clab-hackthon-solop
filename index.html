@@ -13,7 +13,7 @@
       <h1 class="site-title">활동 기록부</h1>
     </header>
 
-    <section class="list-section">
+    <section id="records-view" class="tab-view active">
       <div class="list-header">
         <h2 class="list-title">기록된 활동</h2>
         <div class="header-actions">
@@ -36,7 +36,24 @@
 
       <div id="activity-list" class="activity-list"></div>
     </section>
+
+    <section id="todos-view" class="tab-view">
+      <div class="list-header">
+        <h2 class="list-title">할 일</h2>
+        <div class="header-actions">
+          <button type="button" id="open-todo-create-button" class="primary-button">+ 새 할일 기록</button>
+          <button type="button" id="toggle-todo-select-button" class="secondary-button">삭제</button>
+        </div>
+      </div>
+
+      <div id="todo-list" class="todo-list"></div>
+    </section>
   </main>
+
+  <nav class="bottom-tabs">
+    <button type="button" class="tab-button active" data-tab="records">기록</button>
+    <button type="button" class="tab-button" data-tab="todos">할일</button>
+  </nav>
 
   <dialog id="activity-dialog" class="activity-dialog">
     <form id="activity-form" class="form" novalidate>
@@ -98,6 +115,24 @@
       <div class="submit-row">
         <button type="submit" class="stamp-button">기록하기</button>
         <button type="button" id="cancel-dialog-button" class="cancel-edit-button">취소</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="todo-dialog" class="activity-dialog">
+    <form id="todo-form" class="form" novalidate>
+      <p class="eyebrow">CLUB ACTIVITY LOG</p>
+      <h2 class="dialog-title">할 일 기록</h2>
+
+      <div class="field">
+        <label class="field-label" for="todo-text">할 일</label>
+        <input class="field-input" type="text" id="todo-text" name="text" required />
+        <p class="field-error" id="todo-text-error"></p>
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="stamp-button">기록하기</button>
+        <button type="button" id="cancel-todo-dialog-button" class="cancel-edit-button">취소</button>
       </div>
     </form>
   </dialog>

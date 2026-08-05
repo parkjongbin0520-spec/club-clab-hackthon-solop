@@ -31,6 +31,7 @@
 활동 1건은 다음 형태로 저장한다.
 { id, title, date, place, memberCount, memo, createdAt }
 localStorage 키: "activities"
+Session 4에서 rating(1~5 정수), review(한줄 평) 필드 추가 예정 (아직 미구현)
 
 # 로컬 개발 및 배포 환경
 
@@ -49,8 +50,9 @@ localStorage 키: "activities"
 1. **Session 1** — 로컬 개발 환경 확인(Live Server 실행) + 활동 등록 폼 UI 및 localStorage 저장
 2. **Session 2** — 활동 목록 조회 (최신순 정렬, 빈 목록 안내 문구)
 3. **Session 3** — 활동 삭제(확인 절차) + 입력값 검증(필수값, 미래 날짜 금지, 인원수 양의 정수)
-4. **Session 4** — MVP 커밋 정리, 같은 네트워크 다른 기기에서 동작 확인, GitHub Pages 배포
-5. **Session 5 이후** — 선택 기능을 우선순위대로 세션별 진행:
+4. **Session 4** — 활동 평가 기록 (별점 1~5 + 한줄평, 사용자 추가 요청)
+5. **Session 5** — MVP 커밋 정리, 같은 네트워크 다른 기기에서 동작 확인, GitHub Pages 배포
+6. **Session 6 이후** — 선택 기능을 우선순위대로 세션별 진행:
    검색/필터 → 참여 인원 합계·평균 요약 → 월별 통계 → JSON 내보내기/가져오기 → 수정 기능 → 반응형 레이아웃
 
 # 작업 방식
@@ -87,7 +89,8 @@ localStorage 키: "activities"
 # 현재 진행 상황
 
 - [x] Session 1: 로컬 환경 + 활동 등록
-- [ ] Session 2: 활동 목록 조회
+- [x] Session 2: 활동 목록 조회
 - [ ] Session 3: 활동 삭제 + 입력값 검증
-- [ ] Session 4: MVP 정리 + 다른 기기 확인 + GitHub Pages 배포
-- [ ] Session 5+: 선택 기능 (검색/필터 → 통계 요약 → 월별 통계 → JSON 내보내기 → 수정 → 반응형)
+- [ ] Session 4: 활동 평가 기록 (별점 + 한줄평)
+- [ ] Session 5: MVP 정리 + 다른 기기 확인 + GitHub Pages 배포
+- [ ] Session 6+: 선택 기능 (검색/필터 → 통계 요약 → 월별 통계 → JSON 내보내기 → 수정 → 반응형)

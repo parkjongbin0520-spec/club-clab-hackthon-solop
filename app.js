@@ -468,6 +468,24 @@ function handleDialogBackdropClick(event) {
   }
 }
 
+// 활동 기록과 할 일을 하나의 JSON 파일로 내보낸다
+function exportData() {
+  const data = {
+    exportedAt: new Date().toISOString(),
+    activities: loadActivities(),
+    todos: loadTodos(),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `club-activity-log-${getTodayString()}.json`;
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
+
 // "기록"/"할일" 탭을 전환한다
 function switchTab(tabName) {
   document.querySelectorAll(".tab-view").forEach((view) => {
@@ -650,6 +668,7 @@ document.getElementById("search-input").addEventListener("input", updateTagSugge
 document.getElementById("filter-start").addEventListener("change", renderList);
 document.getElementById("filter-end").addEventListener("change", renderList);
 document.getElementById("toggle-select-button").addEventListener("click", toggleSelectMode);
+document.getElementById("export-button").addEventListener("click", exportData);
 document.getElementById("dialog-stars").addEventListener("click", (event) => {
   if (!event.target.classList.contains("star-button")) {
     return;

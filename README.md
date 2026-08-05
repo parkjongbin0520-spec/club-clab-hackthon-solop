@@ -6,7 +6,7 @@
 지난 활동에 대한 평가(별점+한줄평)를 남길 수 있는 웹앱입니다.
 브라우저 `localStorage`만으로 데이터를 저장하며, 별도 서버·DB 없이 동작합니다.
 
-**바로 사용해보기**: https://parkjongbin0520-spec.github.io/club-clab-hackthon-solop/
+**바로 사용해보기**: https://parkjongbin0520-spec.github.io/hackathon-1-personal-todo-club/
 
 ## 팀원 명단과 역할
 
@@ -42,11 +42,11 @@
 
 ## 실행 방법
 
-- **온라인으로 바로 열기**: https://parkjongbin0520-spec.github.io/club-clab-hackthon-solop/
+- **온라인으로 바로 열기**: https://parkjongbin0520-spec.github.io/hackathon-1-personal-todo-club/
 - **로컬에서 실행**:
   1. 저장소를 클론합니다.
      ```bash
-     git clone https://github.com/parkjongbin0520-spec/club-clab-hackthon-solop.git
+     git clone https://github.com/parkjongbin0520-spec/hackathon-1-personal-todo-club.git
      ```
   2. VS Code Live Server 등으로 `index.html`을 엽니다. (별도 빌드·서버 설치 불필요, `file://` 직접 열기는 지양)
 

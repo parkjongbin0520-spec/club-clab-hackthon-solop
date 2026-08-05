@@ -122,6 +122,22 @@ body {
   opacity: 0.85;
 }
 
+.delete-button {
+  margin-top: 8px;
+  border: 1px solid var(--error);
+  background: transparent;
+  color: var(--error);
+  font-family: var(--sans);
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background: var(--error);
+  color: var(--card-paper);
+}
+
 .empty-message {
   font-size: 14px;
   text-align: center;

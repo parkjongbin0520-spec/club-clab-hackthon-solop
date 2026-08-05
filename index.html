@@ -7,55 +7,20 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="cover">
-    <div class="page">
-    <section class="card">
+  <main class="page">
+    <header class="site-header">
       <p class="eyebrow">CLUB ACTIVITY LOG</p>
-      <h1 class="title">활동 기록부</h1>
-      <div class="rule"></div>
-
-      <form id="activity-form" class="form" novalidate>
-        <div class="field">
-          <label class="field-label" for="title">활동명</label>
-          <input class="field-input" type="text" id="title" name="title" required />
-          <p class="field-error" id="title-error"></p>
-        </div>
-
-        <div class="field">
-          <label class="field-label" for="date">날짜</label>
-          <input class="field-input" type="date" id="date" name="date" />
-          <p class="field-error" id="date-error"></p>
-        </div>
-
-        <div class="field">
-          <label class="field-label" for="place">장소</label>
-          <input class="field-input" type="text" id="place" name="place" />
-        </div>
-
-        <div class="field">
-          <div class="field-inline">
-            <label class="field-label" for="memberCount">참여 인원</label>
-            <input class="field-input field-input-small" type="number" id="memberCount" name="memberCount" min="1" step="1" value="1" />
-            <span class="field-unit">명</span>
-          </div>
-          <p class="field-error" id="memberCount-error"></p>
-        </div>
-
-        <div class="field">
-          <label class="field-label" for="memo">메모</label>
-          <textarea class="field-input" id="memo" name="memo" rows="3"></textarea>
-        </div>
-
-        <div class="submit-row">
-          <button type="submit" class="stamp-button">기록하기</button>
-          <button type="button" id="cancel-edit-button" class="cancel-edit-button" hidden>수정 취소</button>
-        </div>
-      </form>
-    </section>
+      <h1 class="site-title">활동 기록부</h1>
+    </header>
 
     <section class="list-section">
-      <p class="eyebrow">RECORDED ENTRIES</p>
-      <h2 class="list-title">기록된 활동</h2>
+      <div class="list-header">
+        <h2 class="list-title">기록된 활동</h2>
+        <div class="header-actions">
+          <button type="button" id="open-create-button" class="primary-button">+ 새 활동 기록</button>
+          <button type="button" id="toggle-select-button" class="secondary-button">삭제</button>
+        </div>
+      </div>
 
       <div class="filter-bar">
         <input type="text" id="search-input" class="filter-input" placeholder="활동명·장소 검색" />
@@ -68,8 +33,66 @@
 
       <div id="activity-list" class="activity-list"></div>
     </section>
-    </div>
   </main>
+
+  <dialog id="activity-dialog" class="activity-dialog">
+    <form id="activity-form" class="form" novalidate>
+      <p class="eyebrow">CLUB ACTIVITY LOG</p>
+      <h2 class="dialog-title">활동 기록</h2>
+
+      <div class="field">
+        <label class="field-label" for="title">활동명</label>
+        <input class="field-input" type="text" id="title" name="title" required />
+        <p class="field-error" id="title-error"></p>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="date">날짜</label>
+        <input class="field-input" type="date" id="date" name="date" />
+        <p class="field-error" id="date-error"></p>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="place">장소</label>
+        <input class="field-input" type="text" id="place" name="place" />
+      </div>
+
+      <div class="field">
+        <div class="field-inline">
+          <label class="field-label" for="memberCount">참여 인원</label>
+          <input class="field-input field-input-small" type="number" id="memberCount" name="memberCount" min="1" step="1" value="1" />
+          <span class="field-unit">명</span>
+        </div>
+        <p class="field-error" id="memberCount-error"></p>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="memo">메모</label>
+        <textarea class="field-input" id="memo" name="memo" rows="3"></textarea>
+      </div>
+
+      <div class="field">
+        <label class="field-label">평가</label>
+        <div class="star-input" id="dialog-stars">
+          <button type="button" class="star-button" data-value="1">☆</button>
+          <button type="button" class="star-button" data-value="2">☆</button>
+          <button type="button" class="star-button" data-value="3">☆</button>
+          <button type="button" class="star-button" data-value="4">☆</button>
+          <button type="button" class="star-button" data-value="5">☆</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="review-input">한줄평</label>
+        <input class="field-input" type="text" id="review-input" name="review" placeholder="한줄평을 입력하세요" />
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="stamp-button">기록하기</button>
+        <button type="button" id="cancel-dialog-button" class="cancel-edit-button">취소</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="app.js"></script>
 </body>

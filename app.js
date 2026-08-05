@@ -1,5 +1,8 @@
 const STORAGE_KEY = "activities";
 let editingId = null;
+let dialogRating = 0;
+let selectMode = false;
+let selectedIds = new Set();
 
 // 활동 고유 id를 생성한다
 function generateId() {
@@ -77,18 +80,6 @@ function validateForm(form) {
   return isValid;
 }
 
-// 특정 활동의 평가(별점, 한줄평)를 저장한다
-function saveRating(id, rating, review) {
-  const activities = loadActivities();
-  const target = activities.find((activity) => activity.id === id);
-  if (!target) {
-    return;
-  }
-  target.rating = rating;
-  target.review = review;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
-}
-
 // 활동 1건의 필드를 수정해 저장한다
 function updateActivity(id, fields) {
   const activities = loadActivities();
@@ -100,7 +91,29 @@ function updateActivity(id, fields) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
 }
 
-// 활동 카드의 값을 등록 폼으로 불러와 수정 모드로 전환한다
+// 모달의 별점 버튼 표시를 dialogRating 값에 맞게 갱신한다
+function updateDialogStars() {
+  document.querySelectorAll("#dialog-stars .star-button").forEach((button) => {
+    button.textContent = Number(button.dataset.value) <= dialogRating ? "★" : "☆";
+  });
+}
+
+// 등록/수정 폼과 모달을 초기 상태로 되돌린다
+function resetDialogState() {
+  editingId = null;
+  dialogRating = 0;
+  document.getElementById("activity-form").reset();
+  updateDialogStars();
+  document.querySelector(".stamp-button").textContent = "기록하기";
+}
+
+// 새 활동을 기록하기 위해 모달을 연다
+function openCreateDialog() {
+  resetDialogState();
+  document.getElementById("activity-dialog").showModal();
+}
+
+// 활동 카드의 값을 등록 폼으로 불러와 수정 모드로 모달을 연다
 function startEditing(activity) {
   const form = document.getElementById("activity-form");
   form.title.value = activity.title;
@@ -108,25 +121,13 @@ function startEditing(activity) {
   form.place.value = activity.place;
   form.memberCount.value = activity.memberCount;
   form.memo.value = activity.memo;
+  form.review.value = activity.review || "";
+  dialogRating = activity.rating || 0;
+  updateDialogStars();
 
   editingId = activity.id;
   document.querySelector(".stamp-button").textContent = "수정 완료";
-  document.getElementById("cancel-edit-button").hidden = false;
-  form.scrollIntoView({ behavior: "smooth" });
-}
-
-// 수정 모드를 종료하고 등록 폼을 초기 상태로 되돌린다
-function stopEditing(form) {
-  editingId = null;
-  form.reset();
-  document.querySelector(".stamp-button").textContent = "기록하기";
-  document.getElementById("cancel-edit-button").hidden = true;
-}
-
-// 활동 1건을 id로 찾아 삭제한다
-function deleteActivityById(id) {
-  const remaining = loadActivities().filter((activity) => activity.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(remaining));
+  document.getElementById("activity-dialog").showModal();
 }
 
 // 저장된 활동을 최신순으로 정렬해서 불러온다
@@ -136,69 +137,14 @@ function loadActivities() {
   return activities.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
-// 평가 표시 줄과 (평소엔 숨겨진) 별점·한줄평 입력 폼을 만든다.
-// 입력 폼을 여닫는 토글 버튼은 따로 반환해 삭제 버튼 옆에 배치한다.
-function createRatingSection(activity) {
-  const section = document.createElement("div");
-  section.className = "rating-section";
-
+// 평가(별점, 한줄평)를 읽기 전용으로 보여주는 줄을 만든다. 수정은 모달에서 한다.
+function createRatingDisplay(activity) {
   const displayLine = document.createElement("p");
   displayLine.className = "rating-display";
   displayLine.textContent = activity.rating
     ? `평가: ${"★".repeat(activity.rating)}${"☆".repeat(5 - activity.rating)} · ${activity.review || "한줄평 없음"}`
     : "평가: 평가 없음";
-  section.appendChild(displayLine);
-
-  const form = document.createElement("div");
-  form.className = "rating-form";
-  form.hidden = true;
-  section.appendChild(form);
-
-  const starRow = document.createElement("div");
-  starRow.className = "star-input";
-  let selectedRating = activity.rating || 0;
-  for (let i = 1; i <= 5; i++) {
-    const starButton = document.createElement("button");
-    starButton.type = "button";
-    starButton.className = "star-button";
-    starButton.textContent = i <= selectedRating ? "★" : "☆";
-    starButton.dataset.value = String(i);
-    starRow.appendChild(starButton);
-  }
-  form.appendChild(starRow);
-
-  const reviewInput = document.createElement("input");
-  reviewInput.type = "text";
-  reviewInput.className = "review-input";
-  reviewInput.placeholder = "한줄평을 입력하세요";
-  reviewInput.value = activity.review || "";
-  form.appendChild(reviewInput);
-
-  starRow.addEventListener("click", (event) => {
-    if (!event.target.classList.contains("star-button")) {
-      return;
-    }
-    selectedRating = Number(event.target.dataset.value);
-    Array.from(starRow.children).forEach((btn, index) => {
-      btn.textContent = index < selectedRating ? "★" : "☆";
-    });
-  });
-
-  const toggleButton = document.createElement("button");
-  toggleButton.type = "button";
-  toggleButton.className = "rating-toggle-button";
-  toggleButton.textContent = "평가";
-  toggleButton.addEventListener("click", () => {
-    if (form.hidden) {
-      form.hidden = false;
-      toggleButton.textContent = "평가 저장";
-      return;
-    }
-    saveRating(activity.id, selectedRating, reviewInput.value.trim());
-    renderList();
-  });
-
-  return { section, toggleButton };
+  return displayLine;
 }
 
 // 활동 1건을 카드 요소로 만든다
@@ -206,6 +152,12 @@ function createActivityCard(activity) {
   const card = document.createElement("details");
   card.className = "activity-card";
   card.dataset.id = activity.id;
+  if (selectMode) {
+    card.classList.add("selectable");
+  }
+  if (selectedIds.has(activity.id)) {
+    card.classList.add("selected");
+  }
 
   const summary = document.createElement("summary");
   const summaryMain = document.createElement("span");
@@ -235,8 +187,7 @@ function createActivityCard(activity) {
   memoLine.textContent = `메모: ${activity.memo || "없음"}`;
   detail.appendChild(memoLine);
 
-  const { section: ratingSection, toggleButton: ratingButton } = createRatingSection(activity);
-  detail.appendChild(ratingSection);
+  detail.appendChild(createRatingDisplay(activity));
 
   const editButton = document.createElement("button");
   editButton.type = "button";
@@ -244,33 +195,77 @@ function createActivityCard(activity) {
   editButton.textContent = "수정";
   editButton.addEventListener("click", () => startEditing(activity));
 
-  const deleteButton = document.createElement("button");
-  deleteButton.type = "button";
-  deleteButton.className = "delete-button";
-  deleteButton.textContent = "삭제";
-  deleteButton.dataset.id = activity.id;
-
   const actionRow = document.createElement("div");
   actionRow.className = "action-row";
-  actionRow.appendChild(ratingButton);
   actionRow.appendChild(editButton);
-  actionRow.appendChild(deleteButton);
   detail.appendChild(actionRow);
 
   card.appendChild(detail);
   return card;
 }
 
-// 목록 영역 클릭을 감지해 삭제 버튼 클릭을 처리한다
+// 선택 삭제 버튼의 문구와 강조 상태를 갱신한다
+function updateSelectButtonLabel() {
+  const button = document.getElementById("toggle-select-button");
+  button.classList.toggle("active", selectMode);
+  if (!selectMode) {
+    button.textContent = "삭제";
+    return;
+  }
+  button.textContent = selectedIds.size > 0 ? `선택 삭제 (${selectedIds.size})` : "선택 취소";
+}
+
+// 카드 1건의 선택 상태를 토글한다 (일괄 삭제용)
+function toggleCardSelection(card) {
+  const id = card.dataset.id;
+  if (selectedIds.has(id)) {
+    selectedIds.delete(id);
+    card.classList.remove("selected");
+  } else {
+    selectedIds.add(id);
+    card.classList.add("selected");
+  }
+  updateSelectButtonLabel();
+}
+
+// 삭제 선택 모드를 켜고 끄거나, 선택된 항목을 한꺼번에 삭제한다
+function toggleSelectMode() {
+  if (!selectMode) {
+    selectMode = true;
+    selectedIds.clear();
+    document.querySelectorAll(".activity-card[open]").forEach((el) => {
+      el.open = false;
+    });
+    updateSelectButtonLabel();
+    renderList();
+    return;
+  }
+
+  if (selectedIds.size === 0) {
+    selectMode = false;
+    updateSelectButtonLabel();
+    renderList();
+    return;
+  }
+
+  if (confirm(`선택한 ${selectedIds.size}개 활동을 삭제할까요?`)) {
+    const remaining = loadActivities().filter((activity) => !selectedIds.has(activity.id));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(remaining));
+    selectMode = false;
+    selectedIds.clear();
+    updateSelectButtonLabel();
+    renderList();
+  }
+}
+
+// 선택 모드에서 카드(summary) 클릭을 감지해 확장 대신 선택을 토글한다
 function handleListClick(event) {
-  if (!event.target.classList.contains("delete-button")) {
+  const summary = event.target.closest("summary");
+  if (!selectMode || !summary) {
     return;
   }
-  if (!confirm("이 활동 기록을 삭제할까요?")) {
-    return;
-  }
-  deleteActivityById(event.target.dataset.id);
-  renderList();
+  event.preventDefault();
+  toggleCardSelection(summary.closest(".activity-card"));
 }
 
 // 검색어·기간 필터를 적용한 활동 목록을 반환한다
@@ -305,7 +300,7 @@ function renderList() {
     empty.className = "empty-message";
     empty.textContent =
       allActivities.length === 0
-        ? "아직 등록된 활동이 없어요. 위 양식에서 첫 활동을 기록해보세요."
+        ? "아직 등록된 활동이 없어요. '+ 새 활동 기록' 버튼을 눌러보세요."
         : "조건에 맞는 활동이 없어요.";
     listEl.appendChild(empty);
     return;
@@ -335,6 +330,8 @@ function handleSubmit(event) {
     place: form.place.value,
     memberCount: Number(form.memberCount.value),
     memo: form.memo.value,
+    rating: dialogRating,
+    review: form.review.value.trim(),
   };
 
   if (editingId) {
@@ -343,16 +340,43 @@ function handleSubmit(event) {
     saveActivity({ id: generateId(), createdAt: new Date().toISOString(), ...fields });
   }
 
-  stopEditing(form);
+  document.getElementById("activity-dialog").close();
   renderList();
 }
 
+// 모달 바깥(백드롭) 클릭을 감지해 모달을 닫는다
+function handleDialogBackdropClick(event) {
+  const dialog = event.currentTarget;
+  const rect = dialog.getBoundingClientRect();
+  const clickedInside =
+    event.clientX >= rect.left &&
+    event.clientX <= rect.right &&
+    event.clientY >= rect.top &&
+    event.clientY <= rect.bottom;
+  if (!clickedInside) {
+    dialog.close();
+  }
+}
+
+const activityDialog = document.getElementById("activity-dialog");
+activityDialog.addEventListener("close", resetDialogState);
+activityDialog.addEventListener("click", handleDialogBackdropClick);
+
 document.getElementById("activity-form").addEventListener("submit", handleSubmit);
 document.getElementById("activity-list").addEventListener("click", handleListClick);
-document.getElementById("cancel-edit-button").addEventListener("click", () => {
-  stopEditing(document.getElementById("activity-form"));
+document.getElementById("open-create-button").addEventListener("click", openCreateDialog);
+document.getElementById("cancel-dialog-button").addEventListener("click", () => {
+  activityDialog.close();
 });
 document.getElementById("search-input").addEventListener("input", renderList);
 document.getElementById("filter-start").addEventListener("change", renderList);
 document.getElementById("filter-end").addEventListener("change", renderList);
+document.getElementById("toggle-select-button").addEventListener("click", toggleSelectMode);
+document.getElementById("dialog-stars").addEventListener("click", (event) => {
+  if (!event.target.classList.contains("star-button")) {
+    return;
+  }
+  dialogRating = Number(event.target.dataset.value);
+  updateDialogStars();
+});
 renderList();

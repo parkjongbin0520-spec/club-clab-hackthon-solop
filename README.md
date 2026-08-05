@@ -1,9 +1,12 @@
 # 동아리 활동 기록 관리 웹앱
 
-> ⚠️ 기획 단계 초안입니다. 구현이 진행되는 대로 아래 항목(실행 화면 스크린샷 등)을 채워 넣습니다.
+> ⚠️ 실행 화면 스크린샷은 아직 추가되지 않았습니다.
 
-동아리 임원이 활동 내역(활동명, 날짜, 장소, 참여 인원, 메모)을 등록·조회·삭제할 수 있는 웹앱입니다.
+동아리 임원이 활동 내역(활동명, 날짜, 장소, 참여 인원, 메모)을 등록·조회·삭제하고,
+지난 활동에 대한 평가(별점+한줄평)를 남길 수 있는 웹앱입니다.
 브라우저 `localStorage`만으로 데이터를 저장하며, 별도 서버·DB 없이 동작합니다.
+
+**바로 사용해보기**: https://parkjongbin0520-spec.github.io/club-clab-hackthon-solop/
 
 ## 팀원 명단과 역할
 
@@ -34,11 +37,13 @@
 
 ## 실행 방법
 
-1. 저장소를 클론합니다.
-   ```bash
-   git clone https://github.com/parkjongbin0520-spec/club-clab-hackthon-solop.git
-   ```
-2. `index.html`을 브라우저로 엽니다. (별도 빌드·서버 설치 불필요)
+- **온라인으로 바로 열기**: https://parkjongbin0520-spec.github.io/club-clab-hackthon-solop/
+- **로컬에서 실행**:
+  1. 저장소를 클론합니다.
+     ```bash
+     git clone https://github.com/parkjongbin0520-spec/club-clab-hackthon-solop.git
+     ```
+  2. VS Code Live Server 등으로 `index.html`을 엽니다. (별도 빌드·서버 설치 불필요, `file://` 직접 열기는 지양)
 
 ## 실행 화면
 

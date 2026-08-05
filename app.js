@@ -1,4 +1,5 @@
 const STORAGE_KEY = "activities";
+let editingId = null;
 
 // 활동 고유 id를 생성한다
 function generateId() {
@@ -86,6 +87,40 @@ function saveRating(id, rating, review) {
   target.rating = rating;
   target.review = review;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
+}
+
+// 활동 1건의 필드를 수정해 저장한다
+function updateActivity(id, fields) {
+  const activities = loadActivities();
+  const target = activities.find((activity) => activity.id === id);
+  if (!target) {
+    return;
+  }
+  Object.assign(target, fields);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
+}
+
+// 활동 카드의 값을 등록 폼으로 불러와 수정 모드로 전환한다
+function startEditing(activity) {
+  const form = document.getElementById("activity-form");
+  form.title.value = activity.title;
+  form.date.value = activity.date;
+  form.place.value = activity.place;
+  form.memberCount.value = activity.memberCount;
+  form.memo.value = activity.memo;
+
+  editingId = activity.id;
+  document.querySelector(".stamp-button").textContent = "수정 완료";
+  document.getElementById("cancel-edit-button").hidden = false;
+  form.scrollIntoView({ behavior: "smooth" });
+}
+
+// 수정 모드를 종료하고 등록 폼을 초기 상태로 되돌린다
+function stopEditing(form) {
+  editingId = null;
+  form.reset();
+  document.querySelector(".stamp-button").textContent = "기록하기";
+  document.getElementById("cancel-edit-button").hidden = true;
 }
 
 // 활동 1건을 id로 찾아 삭제한다
@@ -203,6 +238,12 @@ function createActivityCard(activity) {
   const { section: ratingSection, toggleButton: ratingButton } = createRatingSection(activity);
   detail.appendChild(ratingSection);
 
+  const editButton = document.createElement("button");
+  editButton.type = "button";
+  editButton.className = "edit-button";
+  editButton.textContent = "수정";
+  editButton.addEventListener("click", () => startEditing(activity));
+
   const deleteButton = document.createElement("button");
   deleteButton.type = "button";
   deleteButton.className = "delete-button";
@@ -212,6 +253,7 @@ function createActivityCard(activity) {
   const actionRow = document.createElement("div");
   actionRow.className = "action-row";
   actionRow.appendChild(ratingButton);
+  actionRow.appendChild(editButton);
   actionRow.appendChild(deleteButton);
   detail.appendChild(actionRow);
 
@@ -266,21 +308,27 @@ function handleSubmit(event) {
     return;
   }
 
-  const activity = {
-    id: generateId(),
+  const fields = {
     title: form.title.value,
     date: form.date.value,
     place: form.place.value,
-    memberCount: Number(form.memberCount.value) || 0,
+    memberCount: Number(form.memberCount.value),
     memo: form.memo.value,
-    createdAt: new Date().toISOString(),
   };
 
-  saveActivity(activity);
-  form.reset();
+  if (editingId) {
+    updateActivity(editingId, fields);
+  } else {
+    saveActivity({ id: generateId(), createdAt: new Date().toISOString(), ...fields });
+  }
+
+  stopEditing(form);
   renderList();
 }
 
 document.getElementById("activity-form").addEventListener("submit", handleSubmit);
 document.getElementById("activity-list").addEventListener("click", handleListClick);
+document.getElementById("cancel-edit-button").addEventListener("click", () => {
+  stopEditing(document.getElementById("activity-form"));
+});
 renderList();

@@ -76,6 +76,18 @@ function validateForm(form) {
   return isValid;
 }
 
+// 특정 활동의 평가(별점, 한줄평)를 저장한다
+function saveRating(id, rating, review) {
+  const activities = loadActivities();
+  const target = activities.find((activity) => activity.id === id);
+  if (!target) {
+    return;
+  }
+  target.rating = rating;
+  target.review = review;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
+}
+
 // 활동 1건을 id로 찾아 삭제한다
 function deleteActivityById(id) {
   const remaining = loadActivities().filter((activity) => activity.id !== id);
@@ -89,10 +101,76 @@ function loadActivities() {
   return activities.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
+// 평가 표시 줄과 (평소엔 숨겨진) 별점·한줄평 입력 폼을 만든다.
+// 입력 폼을 여닫는 토글 버튼은 따로 반환해 삭제 버튼 옆에 배치한다.
+function createRatingSection(activity) {
+  const section = document.createElement("div");
+  section.className = "rating-section";
+
+  const displayLine = document.createElement("p");
+  displayLine.className = "rating-display";
+  displayLine.textContent = activity.rating
+    ? `평가: ${"★".repeat(activity.rating)}${"☆".repeat(5 - activity.rating)} · ${activity.review || "한줄평 없음"}`
+    : "평가: 평가 없음";
+  section.appendChild(displayLine);
+
+  const form = document.createElement("div");
+  form.className = "rating-form";
+  form.hidden = true;
+  section.appendChild(form);
+
+  const starRow = document.createElement("div");
+  starRow.className = "star-input";
+  let selectedRating = activity.rating || 0;
+  for (let i = 1; i <= 5; i++) {
+    const starButton = document.createElement("button");
+    starButton.type = "button";
+    starButton.className = "star-button";
+    starButton.textContent = i <= selectedRating ? "★" : "☆";
+    starButton.dataset.value = String(i);
+    starRow.appendChild(starButton);
+  }
+  form.appendChild(starRow);
+
+  const reviewInput = document.createElement("input");
+  reviewInput.type = "text";
+  reviewInput.className = "review-input";
+  reviewInput.placeholder = "한줄평을 입력하세요";
+  reviewInput.value = activity.review || "";
+  form.appendChild(reviewInput);
+
+  starRow.addEventListener("click", (event) => {
+    if (!event.target.classList.contains("star-button")) {
+      return;
+    }
+    selectedRating = Number(event.target.dataset.value);
+    Array.from(starRow.children).forEach((btn, index) => {
+      btn.textContent = index < selectedRating ? "★" : "☆";
+    });
+  });
+
+  const toggleButton = document.createElement("button");
+  toggleButton.type = "button";
+  toggleButton.className = "rating-toggle-button";
+  toggleButton.textContent = "평가";
+  toggleButton.addEventListener("click", () => {
+    if (form.hidden) {
+      form.hidden = false;
+      toggleButton.textContent = "평가 저장";
+      return;
+    }
+    saveRating(activity.id, selectedRating, reviewInput.value.trim());
+    renderList();
+  });
+
+  return { section, toggleButton };
+}
+
 // 활동 1건을 카드 요소로 만든다
 function createActivityCard(activity) {
   const card = document.createElement("details");
   card.className = "activity-card";
+  card.dataset.id = activity.id;
 
   const summary = document.createElement("summary");
   const summaryMain = document.createElement("span");
@@ -122,12 +200,20 @@ function createActivityCard(activity) {
   memoLine.textContent = `메모: ${activity.memo || "없음"}`;
   detail.appendChild(memoLine);
 
+  const { section: ratingSection, toggleButton: ratingButton } = createRatingSection(activity);
+  detail.appendChild(ratingSection);
+
   const deleteButton = document.createElement("button");
   deleteButton.type = "button";
   deleteButton.className = "delete-button";
   deleteButton.textContent = "삭제";
   deleteButton.dataset.id = activity.id;
-  detail.appendChild(deleteButton);
+
+  const actionRow = document.createElement("div");
+  actionRow.className = "action-row";
+  actionRow.appendChild(ratingButton);
+  actionRow.appendChild(deleteButton);
+  detail.appendChild(actionRow);
 
   card.appendChild(detail);
   return card;
@@ -148,6 +234,9 @@ function handleListClick(event) {
 // 활동 목록 영역을 다시 그린다
 function renderList() {
   const listEl = document.getElementById("activity-list");
+  const openIds = Array.from(listEl.querySelectorAll(".activity-card[open]")).map(
+    (el) => el.dataset.id
+  );
   listEl.innerHTML = "";
 
   const activities = loadActivities();
@@ -160,7 +249,11 @@ function renderList() {
   }
 
   activities.forEach((activity) => {
-    listEl.appendChild(createActivityCard(activity));
+    const card = createActivityCard(activity);
+    if (openIds.includes(activity.id)) {
+      card.open = true;
+    }
+    listEl.appendChild(card);
   });
 }
 

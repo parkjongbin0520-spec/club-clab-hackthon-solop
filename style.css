@@ -122,8 +122,76 @@ body {
   opacity: 0.85;
 }
 
-.delete-button {
+.rating-section {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(31, 42, 36, 0.25);
+}
+
+.rating-display {
+  margin: 0;
+  opacity: 0.85;
+}
+
+.rating-form {
   margin-top: 8px;
+}
+
+.star-input {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.star-button {
+  border: none;
+  background: transparent;
+  color: var(--stamp-mustard);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.review-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--ink);
+  background: transparent;
+  font-family: var(--sans);
+  font-size: 14px;
+  padding: 4px 2px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.review-input:focus {
+  outline: none;
+  border-bottom: 2px solid var(--rule-red);
+}
+
+.action-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.rating-toggle-button {
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.rating-toggle-button:hover {
+  background: var(--ink);
+  color: var(--card-paper);
+}
+
+.delete-button {
   border: 1px solid var(--error);
   background: transparent;
   color: var(--error);

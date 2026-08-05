@@ -58,6 +58,43 @@ body {
   font-size: 18px;
 }
 
+.filter-bar {
+  margin-top: 12px;
+}
+
+.filter-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--ink);
+  background: transparent;
+  font-family: var(--sans);
+  font-size: 14px;
+  padding: 4px 2px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-bottom: 2px solid var(--rule-red);
+}
+
+.filter-date-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-date {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.filter-tilde {
+  font-family: var(--mono);
+  opacity: 0.6;
+}
+
 .activity-list {
   margin-top: 12px;
 }

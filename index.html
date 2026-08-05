@@ -56,6 +56,16 @@
     <section class="list-section">
       <p class="eyebrow">RECORDED ENTRIES</p>
       <h2 class="list-title">기록된 활동</h2>
+
+      <div class="filter-bar">
+        <input type="text" id="search-input" class="filter-input" placeholder="활동명·장소 검색" />
+        <div class="filter-date-row">
+          <input type="date" id="filter-start" class="filter-input filter-date" />
+          <span class="filter-tilde">~</span>
+          <input type="date" id="filter-end" class="filter-input filter-date" />
+        </div>
+      </div>
+
       <div id="activity-list" class="activity-list"></div>
     </section>
     </div>

@@ -273,6 +273,23 @@ function handleListClick(event) {
   renderList();
 }
 
+// 검색어·기간 필터를 적용한 활동 목록을 반환한다
+function filterActivities(activities) {
+  const keyword = document.getElementById("search-input").value.trim().toLowerCase();
+  const start = document.getElementById("filter-start").value;
+  const end = document.getElementById("filter-end").value;
+
+  return activities.filter((activity) => {
+    const matchesKeyword =
+      !keyword ||
+      activity.title.toLowerCase().includes(keyword) ||
+      (activity.place || "").toLowerCase().includes(keyword);
+    const matchesStart = !start || (activity.date && activity.date >= start);
+    const matchesEnd = !end || (activity.date && activity.date <= end);
+    return matchesKeyword && matchesStart && matchesEnd;
+  });
+}
+
 // 활동 목록 영역을 다시 그린다
 function renderList() {
   const listEl = document.getElementById("activity-list");
@@ -281,11 +298,15 @@ function renderList() {
   );
   listEl.innerHTML = "";
 
-  const activities = loadActivities();
+  const allActivities = loadActivities();
+  const activities = filterActivities(allActivities);
   if (activities.length === 0) {
     const empty = document.createElement("p");
     empty.className = "empty-message";
-    empty.textContent = "아직 등록된 활동이 없어요. 위 양식에서 첫 활동을 기록해보세요.";
+    empty.textContent =
+      allActivities.length === 0
+        ? "아직 등록된 활동이 없어요. 위 양식에서 첫 활동을 기록해보세요."
+        : "조건에 맞는 활동이 없어요.";
     listEl.appendChild(empty);
     return;
   }
@@ -331,4 +352,7 @@ document.getElementById("activity-list").addEventListener("click", handleListCli
 document.getElementById("cancel-edit-button").addEventListener("click", () => {
   stopEditing(document.getElementById("activity-form"));
 });
+document.getElementById("search-input").addEventListener("input", renderList);
+document.getElementById("filter-start").addEventListener("change", renderList);
+document.getElementById("filter-end").addEventListener("change", renderList);
 renderList();

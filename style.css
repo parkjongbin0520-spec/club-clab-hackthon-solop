@@ -137,6 +137,12 @@ body {
   color: var(--muted);
 }
 
+.stats-summary {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .activity-list {
   display: flex;
   flex-direction: column;

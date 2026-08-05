@@ -364,6 +364,31 @@ function updateTagSuggestions() {
   });
 }
 
+// 현재 목록(필터 적용분) 기준으로 참여 인원·평점 요약을 표시한다
+function renderStatsSummary(activities) {
+  const summaryEl = document.getElementById("stats-summary");
+
+  if (activities.length === 0) {
+    summaryEl.textContent = "";
+    return;
+  }
+
+  const totalMembers = activities.reduce((sum, activity) => sum + activity.memberCount, 0);
+  const avgMembers = (totalMembers / activities.length).toFixed(1);
+
+  let text = `총 ${activities.length}건 · 참여 인원 합계 ${totalMembers}명 (평균 ${avgMembers}명)`;
+
+  const rated = activities.filter((activity) => activity.rating > 0);
+  if (rated.length > 0) {
+    const avgRating = (
+      rated.reduce((sum, activity) => sum + activity.rating, 0) / rated.length
+    ).toFixed(1);
+    text += ` · 평균 ★${avgRating} (${rated.length}건 평가)`;
+  }
+
+  summaryEl.textContent = text;
+}
+
 // 활동 목록 영역을 다시 그린다
 function renderList() {
   const listEl = document.getElementById("activity-list");
@@ -374,6 +399,8 @@ function renderList() {
 
   const allActivities = loadActivities();
   const activities = filterActivities(allActivities);
+  renderStatsSummary(activities);
+
   if (activities.length === 0) {
     const empty = document.createElement("p");
     empty.className = "empty-message";

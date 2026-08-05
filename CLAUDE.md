@@ -90,7 +90,7 @@ Session 4에서 rating(1~5 정수), review(한줄 평) 필드 추가 예정 (아
 
 - [x] Session 1: 로컬 환경 + 활동 등록
 - [x] Session 2: 활동 목록 조회
-- [ ] Session 3: 활동 삭제 + 입력값 검증
-- [ ] Session 4: 활동 평가 기록 (별점 + 한줄평)
+- [x] Session 3: 활동 삭제 + 입력값 검증
+- [x] Session 4: 활동 평가 기록 (별점 + 한줄평)
 - [ ] Session 5: MVP 정리 + 다른 기기 확인 + GitHub Pages 배포
 - [ ] Session 6+: 선택 기능 (검색/필터 → 통계 요약 → 월별 통계 → JSON 내보내기 → 수정 → 반응형)

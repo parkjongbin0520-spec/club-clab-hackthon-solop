@@ -23,7 +23,8 @@
       </div>
 
       <div class="filter-bar">
-        <input type="text" id="search-input" class="filter-input" placeholder="활동명·장소 검색" />
+        <input type="text" id="search-input" class="filter-input" list="tag-options" placeholder="활동명·장소 검색 (tag:태그1,태그2로 태그 검색)" />
+        <datalist id="tag-options"></datalist>
         <div class="filter-date-row">
           <input type="date" id="filter-start" class="filter-input filter-date" />
           <span class="filter-tilde">~</span>
@@ -55,6 +56,11 @@
       <div class="field">
         <label class="field-label" for="place">장소</label>
         <input class="field-input" type="text" id="place" name="place" />
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="tags">분류 태그</label>
+        <input class="field-input" type="text" id="tags" name="tags" placeholder="예: 학교, 비교과 (콤마로 구분)" />
       </div>
 
       <div class="field">

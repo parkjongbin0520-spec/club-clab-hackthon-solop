@@ -191,6 +191,22 @@ body {
   color: var(--muted);
 }
 
+.tag-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.tag-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
 .activity-card summary::after {
   content: "+";
   color: var(--muted);

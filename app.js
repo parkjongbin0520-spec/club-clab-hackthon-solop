@@ -32,6 +32,14 @@ function pickFutureDateMessage() {
   return FUTURE_DATE_MESSAGES[index];
 }
 
+// 콤마로 구분된 입력을 태그 배열로 변환한다 (빈 항목 제거)
+function parseTagsInput(raw) {
+  return raw
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter((tag) => tag.length > 0);
+}
+
 // 오늘 날짜를 YYYY-MM-DD 형식 문자열로 반환한다
 function getTodayString() {
   const today = new Date();
@@ -119,6 +127,7 @@ function startEditing(activity) {
   form.title.value = activity.title;
   form.date.value = activity.date;
   form.place.value = activity.place;
+  form.tags.value = (activity.tags || []).join(", ");
   form.memberCount.value = activity.memberCount;
   form.memo.value = activity.memo;
   form.review.value = activity.review || "";
@@ -172,6 +181,18 @@ function createActivityCard(activity) {
   metaEl.className = "activity-meta";
   metaEl.textContent = `${activity.date || "날짜 미정"} · ${activity.place || "장소 미정"}`;
   summaryMain.appendChild(metaEl);
+
+  if (activity.tags && activity.tags.length > 0) {
+    const tagsWrap = document.createElement("span");
+    tagsWrap.className = "tag-badges";
+    activity.tags.forEach((tag) => {
+      const badge = document.createElement("span");
+      badge.className = "tag-badge";
+      badge.textContent = tag;
+      tagsWrap.appendChild(badge);
+    });
+    summaryMain.appendChild(tagsWrap);
+  }
 
   summary.appendChild(summaryMain);
   card.appendChild(summary);
@@ -268,20 +289,78 @@ function handleListClick(event) {
   toggleCardSelection(summary.closest(".activity-card"));
 }
 
-// 검색어·기간 필터를 적용한 활동 목록을 반환한다
+// 검색창 입력을 "tag:태그1,태그2" 토큰과 나머지 키워드로 분리한다
+function parseSearchQuery(rawQuery) {
+  const tags = [];
+  const keyword = rawQuery
+    .replace(/tag:(\S+)/g, (_, tagList) => {
+      tagList.split(",").forEach((tag) => {
+        if (tag) {
+          tags.push(tag.toLowerCase());
+        }
+      });
+      return "";
+    })
+    .trim()
+    .toLowerCase();
+  return { tags, keyword };
+}
+
+// 검색어(키워드+태그)·기간 필터를 적용한 활동 목록을 반환한다
 function filterActivities(activities) {
-  const keyword = document.getElementById("search-input").value.trim().toLowerCase();
+  const { tags: tagQueries, keyword } = parseSearchQuery(
+    document.getElementById("search-input").value.trim()
+  );
   const start = document.getElementById("filter-start").value;
   const end = document.getElementById("filter-end").value;
 
   return activities.filter((activity) => {
+    const activityTags = (activity.tags || []).map((tag) => tag.toLowerCase());
+    const matchesTags = tagQueries.every((tag) => activityTags.includes(tag));
     const matchesKeyword =
       !keyword ||
       activity.title.toLowerCase().includes(keyword) ||
       (activity.place || "").toLowerCase().includes(keyword);
     const matchesStart = !start || (activity.date && activity.date >= start);
     const matchesEnd = !end || (activity.date && activity.date <= end);
-    return matchesKeyword && matchesStart && matchesEnd;
+    return matchesTags && matchesKeyword && matchesStart && matchesEnd;
+  });
+}
+
+// 검색창의 마지막 입력 토큰이 "tag:"로 시작하면, 남은 부분을 완성할 태그
+// 후보로 datalist를 채운다. 이미 검색어에 쓰인 태그는 후보에서 뺀다.
+function updateTagSuggestions() {
+  const input = document.getElementById("search-input");
+  const value = input.value;
+  const lastSpaceIndex = value.lastIndexOf(" ");
+  const prefix = lastSpaceIndex === -1 ? "" : value.slice(0, lastSpaceIndex + 1);
+  const lastToken = lastSpaceIndex === -1 ? value : value.slice(lastSpaceIndex + 1);
+
+  const datalist = document.getElementById("tag-options");
+  datalist.innerHTML = "";
+
+  if (!lastToken.startsWith("tag:")) {
+    return;
+  }
+
+  const segments = lastToken.slice(4).split(",");
+  const partial = segments.pop().toLowerCase();
+  const committed = segments.filter((tag) => tag.length > 0);
+  const usedTags = new Set(committed.map((tag) => tag.toLowerCase()));
+
+  const allTags = new Set();
+  loadActivities().forEach((activity) => {
+    (activity.tags || []).forEach((tag) => allTags.add(tag));
+  });
+
+  allTags.forEach((tag) => {
+    const tagLower = tag.toLowerCase();
+    if (usedTags.has(tagLower) || !tagLower.startsWith(partial)) {
+      return;
+    }
+    const option = document.createElement("option");
+    option.value = `${prefix}tag:${[...committed, tag].join(",")}`;
+    datalist.appendChild(option);
   });
 }
 
@@ -328,6 +407,7 @@ function handleSubmit(event) {
     title: form.title.value,
     date: form.date.value,
     place: form.place.value,
+    tags: parseTagsInput(form.tags.value),
     memberCount: Number(form.memberCount.value),
     memo: form.memo.value,
     rating: dialogRating,
@@ -369,6 +449,7 @@ document.getElementById("cancel-dialog-button").addEventListener("click", () => 
   activityDialog.close();
 });
 document.getElementById("search-input").addEventListener("input", renderList);
+document.getElementById("search-input").addEventListener("input", updateTagSuggestions);
 document.getElementById("filter-start").addEventListener("change", renderList);
 document.getElementById("filter-end").addEventListener("change", renderList);
 document.getElementById("toggle-select-button").addEventListener("click", toggleSelectMode);

@@ -16,6 +16,18 @@ function saveActivity(activity) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
 }
 
+const FUTURE_DATE_MESSAGES = [
+  "아직 하지 않은 활동은 등록할 수 없어요.",
+  "미래의 활동은 아직 기록할 수 없어요.",
+  "날짜가 미래예요. 지난 활동만 기록할 수 있어요.",
+];
+
+// 미래 날짜 오류 문구를 무작위로 하나 고른다
+function pickFutureDateMessage() {
+  const index = Math.floor(Math.random() * FUTURE_DATE_MESSAGES.length);
+  return FUTURE_DATE_MESSAGES[index];
+}
+
 // 오늘 날짜를 YYYY-MM-DD 형식 문자열로 반환한다
 function getTodayString() {
   const today = new Date();
@@ -41,7 +53,7 @@ function validateForm(form) {
 
   const dateError = document.getElementById("date-error");
   if (form.date.value && form.date.value > getTodayString()) {
-    dateError.textContent = "미래 날짜는 입력할 수 없어요.";
+    dateError.textContent = pickFutureDateMessage();
     firstInvalidField = firstInvalidField || form.date;
     isValid = false;
   } else {
@@ -51,7 +63,7 @@ function validateForm(form) {
   const memberError = document.getElementById("memberCount-error");
   const memberNumber = Number(form.memberCount.value);
   if (!form.memberCount.value || !Number.isInteger(memberNumber) || memberNumber < 1) {
-    memberError.textContent = "참여 인원은 1 이상의 정수로 입력해주세요.";
+    memberError.textContent = "참여 인원은 1명 이상으로 설정해야해요.";
     firstInvalidField = firstInvalidField || form.memberCount;
     isValid = false;
   } else {

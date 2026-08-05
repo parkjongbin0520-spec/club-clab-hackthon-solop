@@ -1,0 +1,143 @@
+:root {
+  --cover-green: #2f4b3c;
+  --card-paper: #f6efd8;
+  --ink: #1f2a24;
+  --rule-red: #b23a48;
+  --stamp-mustard: #d8a93d;
+  --error: #a6321f;
+  --mono: ui-monospace, "Courier New", Courier, monospace;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--ink);
+}
+
+.cover {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cover-green);
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card-paper);
+  padding: 32px 28px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--rule-red);
+}
+
+.title {
+  margin: 4px 0 12px;
+  font-family: var(--mono);
+  font-size: 28px;
+  letter-spacing: 0.02em;
+}
+
+.rule {
+  height: 2px;
+  background: var(--rule-red);
+  margin-bottom: 24px;
+}
+
+.field {
+  margin-bottom: 18px;
+}
+
+.field-inline {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.field-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.field-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--ink);
+  background: transparent;
+  font-family: var(--sans);
+  font-size: 16px;
+  padding: 4px 2px;
+  color: var(--ink);
+}
+
+.field-input:focus {
+  outline: none;
+  border-bottom: 2px solid var(--rule-red);
+}
+
+.field-error {
+  margin: 4px 0 0;
+  font-size: 12px;
+  min-height: 14px;
+  color: var(--error);
+}
+
+.field-input-small {
+  width: 70px;
+}
+
+.field-unit {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.stamp-button {
+  margin-top: 8px;
+  border: 2px solid var(--ink);
+  background: var(--stamp-mustard);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  padding: 10px 22px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.stamp-button:hover {
+  transform: rotate(-2deg);
+}
+
+.stamp-button:active {
+  transform: scale(0.94) rotate(-2deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp-button {
+    transition: none;
+  }
+  .stamp-button:hover,
+  .stamp-button:active {
+    transform: none;
+  }
+}
